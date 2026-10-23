@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>О приложении</title>
+    <th:block th:replace="~{fragments :: styles}"></th:block>
+</head>
+<body>
+<nav th:replace="~{fragments :: menu('about')}"></nav>
+<div class="container" style="max-width: 800px">
+    <h3>О приложении</h3>
+    <hr/>
+    <p><b>«Учёт покупок»</b> – веб-приложение для учёта покупок и расходов. В нём ведётся список покупок
+        и справочник магазинов, а на форме расчёта считаются расходы за выбранный период.</p>
+
+    <h5 class="mt-4">Роли</h5>
+    <table class="table table-bordered">
+        <thead><tr><th>Роль</th><th>Возможности</th></tr></thead>
+        <tbody>
+        <tr><td>Только чтение (READ_ONLY)</td><td>просмотр всех покупок и магазинов, расчёт расходов. Выдаётся при регистрации</td></tr>
+        <tr><td>Пользователь (USER)</td><td>добавление, изменение и удаление своих записей, видит только свои записи</td></tr>
+        <tr><td>Администратор (ADMIN)</td><td>полный доступ ко всем записям, назначение ролей, мониторинг</td></tr>
+        </tbody>
+    </table>
+
+    <h5 class="mt-4">Технологии</h5>
+    <p>Java 25, Spring Boot 4.1, Spring MVC, Spring Security, Spring Data JPA (Hibernate), H2 Database,
+        Thymeleaf, Bootstrap 5, Lombok, Spring Boot Actuator, Maven.</p>
+
+    <h5 class="mt-4">Разработчик</h5>
+    <p class="mb-1">Урабов Николай Михайлович, студент группы РИЗ-250213у</p>
+    <p class="mb-1">Курсовой проект по дисциплине «Технологии программирования»</p>
+    <p>УрФУ, ИРИТ-РТФ, Центр ускоренного обучения, 2026 г.</p>
+
+    <a th:href="@{/}" class="btn btn-outline-success mt-2">На главную</a>
+</div>
+</body>
+</html>

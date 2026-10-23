@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Роли пользователей</title>
+    <th:block th:replace="~{fragments :: styles}"></th:block>
+</head>
+<body>
+<nav th:replace="~{fragments :: menu('admin')}"></nav>
+<div class="container">
+    <h3>Роли пользователей</h3>
+    <hr/>
+    <th:block th:replace="~{fragments :: messages}"></th:block>
+    <p class="text-muted">Роль «Только чтение» есть у всех пользователей. Отметьте дополнительные роли и нажмите «Сохранить».</p>
+
+    <table class="table table-bordered align-middle">
+        <thead>
+        <tr>
+            <th>Логин</th>
+            <th>Зарегистрирован</th>
+            <th>Текущие роли</th>
+            <th class="text-center">USER</th>
+            <th class="text-center">ADMIN</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="u : ${users}">
+            <td th:text="${u.username}"></td>
+            <td th:text="${#temporals.format(u.registeredAt, 'dd.MM.yyyy HH:mm')}"></td>
+            <td th:text="${u.rolesTitle}"></td>
+            <td class="text-center">
+                <input type="checkbox" class="form-check-input" name="userRole" value="true"
+                       th:checked="${u.user}" th:attr="form='roles-' + ${u.id}"/>
+            </td>
+            <td class="text-center">
+                <input type="checkbox" class="form-check-input" name="adminRole" value="true"
+                       th:checked="${u.admin}" th:attr="form='roles-' + ${u.id}"/>
+            </td>
+            <td>
+                <input type="hidden" name="userId" th:value="${u.id}" th:attr="form='roles-' + ${u.id}"/>
+                <button type="submit" class="btn btn-success btn-sm" th:attr="form='roles-' + ${u.id}">Сохранить</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <!-- Формы вынесены из таблицы (form внутри tr – недопустимый HTML),
+         поля строки привязаны к своей форме атрибутом form -->
+    <form th:each="u : ${users}" th:action="@{/admin/users/roles}" method="post" th:id="'roles-' + ${u.id}"></form>
+</div>
+</body>
+</html>

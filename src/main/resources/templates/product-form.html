@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Покупка</title>
+    <th:block th:replace="~{fragments :: styles}"></th:block>
+</head>
+<body>
+<nav th:replace="~{fragments :: menu('products')}"></nav>
+<div class="container" style="max-width: 640px">
+    <h3 th:text="${form.id == null} ? 'Новая покупка' : 'Изменение покупки'">Покупка</h3>
+    <hr/>
+    <div th:if="${shops.isEmpty()}" class="alert alert-warning">
+        Сначала <a th:href="@{/shops/new}">добавьте магазин</a>: покупка привязывается к магазину.
+    </div>
+    <form th:action="@{/products/save}" th:object="${form}" method="post" novalidate>
+        <input type="hidden" th:field="*{id}"/>
+        <div class="mb-3">
+            <label class="form-label" for="name">Наименование</label>
+            <input type="text" th:field="*{name}" class="form-control" th:errorclass="is-invalid"/>
+            <div class="invalid-feedback" th:errors="*{name}"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label" for="category">Категория</label>
+                <select th:field="*{category}" class="form-select" th:errorclass="is-invalid">
+                    <option value="">— выберите —</option>
+                    <option th:each="c : ${categories}" th:value="${c}" th:text="${c.title}"></option>
+                </select>
+                <div class="invalid-feedback" th:errors="*{category}"></div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label" for="shopId">Магазин</label>
+                <select th:field="*{shopId}" class="form-select" th:errorclass="is-invalid">
+                    <option value="">— выберите —</option>
+                    <option th:each="s : ${shops}" th:value="${s.id}" th:text="${s.name + ' (' + s.city + ')'}"></option>
+                </select>
+                <div class="invalid-feedback" th:errors="*{shopId}"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label class="form-label" for="price">Цена, руб.</label>
+                <input type="number" step="0.01" min="0.01" th:field="*{price}" class="form-control" th:errorclass="is-invalid"/>
+                <div class="invalid-feedback" th:errors="*{price}"></div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label" for="quantity">Количество</label>
+                <input type="number" min="1" th:field="*{quantity}" class="form-control" th:errorclass="is-invalid"/>
+                <div class="invalid-feedback" th:errors="*{quantity}"></div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label" for="purchaseDate">Дата покупки</label>
+                <input type="date" th:field="*{purchaseDate}" class="form-control" th:errorclass="is-invalid"/>
+                <div class="invalid-feedback" th:errors="*{purchaseDate}"></div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-success">Сохранить</button>
+        <a th:href="@{/products}" class="btn btn-outline-secondary ms-2">К списку</a>
+    </form>
+</div>
+</body>
+</html>

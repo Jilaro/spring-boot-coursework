@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Учёт покупок</title>
+    <th:block th:replace="~{fragments :: styles}"></th:block>
+</head>
+<body>
+<nav th:replace="~{fragments :: menu('home')}"></nav>
+<div class="container" style="max-width: 900px">
+    <div class="text-center mb-4">
+        <h1>Учёт покупок</h1>
+        <p class="lead">Список покупок, магазинов и расчёт расходов за период</p>
+    </div>
+
+    <div th:unless="${currentUser}" class="text-center">
+        <p>Войдите в систему или зарегистрируйтесь, чтобы начать работу.</p>
+        <a th:href="@{/login}" class="btn btn-success">Войти</a>
+        <a th:href="@{/register}" class="btn btn-outline-success ms-2">Зарегистрироваться</a>
+    </div>
+
+    <div th:if="${currentUser}" class="row g-3">
+        <div class="col-md-4">
+            <div class="card h-100"><div class="card-body">
+                <h5 class="card-title">Покупки</h5>
+                <p class="card-text">Что, где, когда и за сколько куплено.</p>
+                <a th:href="@{/products}" class="btn btn-success btn-sm">Открыть</a>
+            </div></div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100"><div class="card-body">
+                <h5 class="card-title">Магазины</h5>
+                <p class="card-text">Справочник магазинов с адресами.</p>
+                <a th:href="@{/shops}" class="btn btn-success btn-sm">Открыть</a>
+            </div></div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100"><div class="card-body">
+                <h5 class="card-title">Расчёт расходов</h5>
+                <p class="card-text">Сумма за период, разбивка по магазинам и категориям, остаток бюджета.</p>
+                <a th:href="@{/calculate}" class="btn btn-success btn-sm">Открыть</a>
+            </div></div>
+        </div>
+        <div class="col-12">
+            <div class="alert alert-secondary mb-0">
+                Ваша роль: <b th:text="${roleTitle}"></b>.
+                <span th:unless="${canEdit}">Вы можете просматривать записи. Чтобы добавлять свои покупки,
+                    попросите администратора выдать роль «Пользователь».</span>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

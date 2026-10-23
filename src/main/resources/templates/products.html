@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Покупки</title>
+    <th:block th:replace="~{fragments :: styles}"></th:block>
+</head>
+<body>
+<nav th:replace="~{fragments :: menu('products')}"></nav>
+<div class="container">
+    <h3>Список покупок</h3>
+    <hr/>
+    <th:block th:replace="~{fragments :: messages}"></th:block>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a th:if="${canEdit}" th:href="@{/products/new}" class="btn btn-success">Добавить покупку</a>
+        <span th:unless="${canEdit}" class="text-muted">Режим только для чтения</span>
+        <span>Итого: <b th:text="${#numbers.formatDecimal(total, 1, 'WHITESPACE', 2, 'COMMA')} + ' руб.'"></b></span>
+    </div>
+
+    <table class="table table-bordered table-striped align-middle" id="productTable">
+        <thead>
+        <tr>
+            <th>Дата</th>
+            <th>Наименование</th>
+            <th>Категория</th>
+            <th>Магазин</th>
+            <th class="text-end">Цена</th>
+            <th class="text-end">Кол-во</th>
+            <th class="text-end">Стоимость</th>
+            <th th:if="${isAdmin}">Добавил</th>
+            <th th:if="${canEdit}" class="no-sort">Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="p : ${products}">
+            <td th:attr="data-order=${p.purchaseDate}" th:text="${#temporals.format(p.purchaseDate, 'dd.MM.yyyy')}"></td>
+            <td th:text="${p.name}"></td>
+            <td th:text="${p.category.title}"></td>
+            <td th:text="${p.shop.name}"></td>
+            <td class="text-end" th:text="${#numbers.formatDecimal(p.price, 1, 'WHITESPACE', 2, 'COMMA')}"></td>
+            <td class="text-end" th:text="${p.quantity}"></td>
+            <td class="text-end" th:text="${#numbers.formatDecimal(p.cost, 1, 'WHITESPACE', 2, 'COMMA')}"></td>
+            <td th:if="${isAdmin}" th:text="${p.owner.username}"></td>
+            <td th:if="${canEdit}" class="text-nowrap">
+                <th:block th:if="${editableIds.contains(p.id)}">
+                    <a th:href="@{/products/edit(id=${p.id})}" class="btn btn-info btn-sm">Изменить</a>
+                    <form th:action="@{/products/delete}" method="post" class="d-inline"
+                          onsubmit="return confirm('Удалить покупку?')">
+                        <input type="hidden" name="id" th:value="${p.id}"/>
+                        <button type="submit" class="btn btn-danger btn-sm ms-1">Удалить</button>
+                    </form>
+                </th:block>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<th:block th:replace="~{fragments :: table-scripts('productTable')}"></th:block>
+</body>
+</html>

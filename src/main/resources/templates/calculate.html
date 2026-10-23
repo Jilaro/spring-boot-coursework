@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Расчёт расходов</title>
+    <th:block th:replace="~{fragments :: styles}"></th:block>
+</head>
+<body>
+<nav th:replace="~{fragments :: menu('calculate')}"></nav>
+<div class="container" style="max-width: 960px">
+    <h3>Расчёт расходов</h3>
+    <hr/>
+    <form th:action="@{/calculate}" th:object="${form}" method="get" class="row g-3 align-items-end mb-4" novalidate>
+        <div class="col-md-3">
+            <label class="form-label" for="dateFrom">С</label>
+            <input type="date" th:field="*{dateFrom}" class="form-control" th:errorclass="is-invalid"/>
+            <div class="invalid-feedback" th:errors="*{dateFrom}"></div>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label" for="dateTo">По</label>
+            <input type="date" th:field="*{dateTo}" class="form-control" th:errorclass="is-invalid"/>
+            <div class="invalid-feedback" th:errors="*{dateTo}"></div>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label" for="shopId">Магазин</label>
+            <select th:field="*{shopId}" class="form-select">
+                <option value="">все магазины</option>
+                <option th:each="s : ${shops}" th:value="${s.id}" th:text="${s.name}"></option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label" for="budget">Бюджет, руб.</label>
+            <input type="number" step="0.01" th:field="*{budget}" class="form-control" th:errorclass="is-invalid"
+                   placeholder="необязательно"/>
+            <div class="invalid-feedback" th:errors="*{budget}"></div>
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-success">Рассчитать</button>
+        </div>
+    </form>
+
+    <th:block th:if="${result}">
+        <div class="row g-3 mb-4">
+            <div class="col-md-3"><div class="card text-center"><div class="card-body">
+                <div class="text-muted small">Всего потрачено</div>
+                <div class="fs-4 fw-semibold" th:text="${#numbers.formatDecimal(result.totalCost, 1, 'WHITESPACE', 2, 'COMMA')} + ' ₽'"></div>
+            </div></div></div>
+            <div class="col-md-3"><div class="card text-center"><div class="card-body">
+                <div class="text-muted small">Покупок / единиц</div>
+                <div class="fs-4 fw-semibold" th:text="${result.purchaseCount} + ' / ' + ${result.itemCount}"></div>
+            </div></div></div>
+            <div class="col-md-3"><div class="card text-center"><div class="card-body">
+                <div class="text-muted small">Средняя покупка</div>
+                <div class="fs-4 fw-semibold" th:text="${#numbers.formatDecimal(result.averagePurchase, 1, 'WHITESPACE', 2, 'COMMA')} + ' ₽'"></div>
+            </div></div></div>
+            <div class="col-md-3"><div class="card text-center"><div class="card-body">
+                <div class="text-muted small" th:text="'В среднем в день (' + ${result.days} + ' дн.)'"></div>
+                <div class="fs-4 fw-semibold" th:text="${#numbers.formatDecimal(result.averagePerDay, 1, 'WHITESPACE', 2, 'COMMA')} + ' ₽'"></div>
+            </div></div></div>
+        </div>
+
+        <div th:if="${result.budget}" class="mb-4">
+            <div class="d-flex justify-content-between">
+                <span>Бюджет: <b th:text="${#numbers.formatDecimal(result.budget, 1, 'WHITESPACE', 2, 'COMMA')} + ' ₽'"></b></span>
+                <span th:if="${!result.overBudget()}">Остаток: <b class="text-success"
+                      th:text="${#numbers.formatDecimal(result.budgetLeft, 1, 'WHITESPACE', 2, 'COMMA')} + ' ₽'"></b></span>
+                <span th:if="${result.overBudget()}">Перерасход: <b class="text-danger"
+                      th:text="${#numbers.formatDecimal(result.budgetLeft.negate(), 1, 'WHITESPACE', 2, 'COMMA')} + ' ₽'"></b></span>
+            </div>
+            <div class="progress mt-2" style="height: 22px">
+                <div class="progress-bar" th:classappend="${result.overBudget()} ? 'bg-danger' : 'bg-success'"
+                     th:style="'width:' + ${result.budgetBarPercent()} + '%'"
+                     th:text="${result.budgetUsedPercent} + ' %'"></div>
+            </div>
+        </div>
+
+        <p th:if="${result.mostExpensive}">Самая дорогая покупка:
+            <b th:text="${result.mostExpensive.name}"></b>
+            (<span th:text="${result.mostExpensive.shop.name}"></span>,
+            <span th:text="${#temporals.format(result.mostExpensive.purchaseDate, 'dd.MM.yyyy')}"></span>) –
+            <span th:text="${#numbers.formatDecimal(result.mostExpensive.cost, 1, 'WHITESPACE', 2, 'COMMA')} + ' ₽'"></span>
+        </p>
+        <p th:unless="${result.mostExpensive}" class="text-muted">За выбранный период покупок нет.</p>
+
+        <div class="row" th:if="${result.purchaseCount > 0}">
+            <div class="col-md-6">
+                <h5>По магазинам</h5>
+                <table class="table table-sm table-bordered">
+                    <tr th:each="e : ${result.byShop}">
+                        <td th:text="${e.key}"></td>
+                        <td class="text-end" th:text="${#numbers.formatDecimal(e.value, 1, 'WHITESPACE', 2, 'COMMA')}"></td>
+                        <td class="text-end text-muted" style="width: 70px"
+                            th:text="${#numbers.formatDecimal(e.value * 100 / result.totalCost, 1, 1, 'COMMA')} + ' %'"></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h5>По категориям</h5>
+                <table class="table table-sm table-bordered">
+                    <tr th:each="e : ${result.byCategory}">
+                        <td th:text="${e.key}"></td>
+                        <td class="text-end" th:text="${#numbers.formatDecimal(e.value, 1, 'WHITESPACE', 2, 'COMMA')}"></td>
+                        <td class="text-end text-muted" style="width: 70px"
+                            th:text="${#numbers.formatDecimal(e.value * 100 / result.totalCost, 1, 1, 'COMMA')} + ' %'"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </th:block>
+</div>
+</body>
+</html>

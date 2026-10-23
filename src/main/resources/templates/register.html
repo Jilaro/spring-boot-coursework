@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Регистрация</title>
+    <th:block th:replace="~{fragments :: styles}"></th:block>
+</head>
+<body>
+<nav th:replace="~{fragments :: menu('register')}"></nav>
+<div class="container" style="max-width: 440px">
+    <div class="card">
+        <div class="card-header"><h4 class="mb-0 text-center">Регистрация</h4></div>
+        <div class="card-body">
+            <form th:action="@{/register}" th:object="${form}" method="post" novalidate>
+                <div class="mb-3">
+                    <label class="form-label" for="username">Логин</label>
+                    <input type="text" th:field="*{username}" class="form-control" th:errorclass="is-invalid"/>
+                    <div class="invalid-feedback" th:errors="*{username}"></div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="password">Пароль</label>
+                    <input type="password" th:field="*{password}" class="form-control" th:errorclass="is-invalid"/>
+                    <div class="invalid-feedback" th:errors="*{password}"></div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="confirmPassword">Повтор пароля</label>
+                    <input type="password" th:field="*{confirmPassword}" class="form-control" th:errorclass="is-invalid"/>
+                    <div class="invalid-feedback" th:errors="*{confirmPassword}"></div>
+                </div>
+                <p class="text-muted small">После регистрации выдаётся роль «Только чтение».
+                    Права на добавление записей выдаёт администратор.</p>
+                <button type="submit" class="btn btn-success w-100">Зарегистрироваться</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

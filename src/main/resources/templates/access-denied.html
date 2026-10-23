@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Доступ запрещён</title>
+    <th:block th:replace="~{fragments :: styles}"></th:block>
+</head>
+<body>
+<nav th:replace="~{fragments :: menu('')}"></nav>
+<div class="container text-center" style="max-width: 560px">
+    <h3 class="mt-4">403 – доступ запрещён</h3>
+    <p class="mt-3">У вашей роли (<b th:text="${roleTitle}"></b>) нет прав на это действие.</p>
+    <a th:href="@{/products}" class="btn btn-success">К списку покупок</a>
+</div>
+</body>
+</html>
