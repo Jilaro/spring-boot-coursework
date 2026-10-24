@@ -21,6 +21,7 @@
             </th:block>
             <th:block th:if="${isAdmin}">
                 <a class="nav-link" th:classappend="${active == 'admin'} ? 'active'" th:href="@{/admin/users}">Роли пользователей</a>
+                <a class="nav-link" th:classappend="${active == 'actions'} ? 'active'" th:href="@{/admin/actions}">Журнал действий</a>
                 <a class="nav-link" th:href="@{/actuator/health}" target="_blank">Мониторинг</a>
             </th:block>
             <a class="nav-link" th:classappend="${active == 'about'} ? 'active'" th:href="@{/about}">О приложении</a>

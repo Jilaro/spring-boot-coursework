@@ -1,7 +1,6 @@
 package ru.urabov.shopping.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +17,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -26,6 +24,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ActionLogService actionLog;
 
     @Transactional(readOnly = true)
     public boolean exists(String username) {
@@ -36,7 +35,7 @@ public class UserService {
     @Transactional
     public User register(RegistrationForm form) {
         User user = create(form.getUsername(), form.getPassword(), RoleName.ROLE_READ_ONLY);
-        log.info("Регистрация: пользователь {} с ролью READ_ONLY", user.getUsername());
+        actionLog.info(user.getUsername(), "зарегистрировался, выдана роль READ_ONLY");
         return user;
     }
 
@@ -76,8 +75,8 @@ public class UserService {
         if (adminRole) {
             user.getRoles().add(role(RoleName.ROLE_ADMIN));
         }
-        log.info("{} изменил роли пользователя {}: USER = {}, ADMIN = {}",
-                changedBy, user.getUsername(), userRole, adminRole);
+        actionLog.info(changedBy, "изменил роли пользователя " + user.getUsername()
+                + ": USER = " + userRole + ", ADMIN = " + adminRole);
     }
 
     // Роль создаётся при первом обращении

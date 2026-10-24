@@ -1,7 +1,6 @@
 package ru.urabov.shopping.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +13,6 @@ import ru.urabov.shopping.security.CurrentUser;
 
 import java.util.List;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ShopService {
@@ -22,6 +20,7 @@ public class ShopService {
     private final ShopRepository shopRepository;
     private final ProductRepository productRepository;
     private final CurrentUser currentUser;
+    private final ActionLogService actionLog;
 
     // ADMIN и READ_ONLY видят все магазины, USER – только свои
     @Transactional(readOnly = true)
@@ -63,8 +62,8 @@ public class ShopService {
         shop.setCity(form.getCity().trim());
         shop.setAddress(form.getAddress() == null ? null : form.getAddress().trim());
         Shop saved = shopRepository.save(shop);
-        log.info("{} {} магазин id = {}: {}", user.getUsername(),
-                form.getId() == null ? "добавил" : "изменил", saved.getId(), saved.getName());
+        actionLog.info(user.getUsername(), (form.getId() == null ? "добавил" : "изменил")
+                + " магазин id = " + saved.getId() + ": " + saved.getName());
         return saved;
     }
 
@@ -74,12 +73,12 @@ public class ShopService {
         Shop shop = getForEdit(id);
         long products = productRepository.countByShop(shop);
         if (products > 0) {
-            log.warn("{} пытался удалить магазин {}, в котором {} покупок",
-                    currentUser.username().orElse("?"), shop.getName(), products);
+            actionLog.warn(currentUser.username().orElse("?"),
+                    "пытался удалить магазин " + shop.getName() + ", в котором " + products + " покупок");
             return "Нельзя удалить магазин «" + shop.getName() + "»: в нём " + products + " покупок";
         }
         shopRepository.delete(shop);
-        log.info("{} удалил магазин id = {}: {}", currentUser.username().orElse("?"), id, shop.getName());
+        actionLog.info(currentUser.username().orElse("?"), "удалил магазин id = " + id + ": " + shop.getName());
         return null;
     }
 
@@ -89,7 +88,6 @@ public class ShopService {
 
     private void checkCanModify(Shop shop) {
         if (!canModify(shop)) {
-            log.warn("{}: отказано в изменении магазина id = {}", currentUser.username().orElse("?"), shop.getId());
             throw new AccessDeniedException("Нет прав на изменение магазина " + shop.getId());
         }
     }

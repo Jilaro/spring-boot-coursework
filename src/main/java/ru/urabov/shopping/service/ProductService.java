@@ -1,7 +1,6 @@
 package ru.urabov.shopping.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +12,6 @@ import ru.urabov.shopping.security.CurrentUser;
 
 import java.util.List;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -21,6 +19,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ShopService shopService;
     private final CurrentUser currentUser;
+    private final ActionLogService actionLog;
 
     // ADMIN и READ_ONLY видят все покупки, USER – только свои
     @Transactional(readOnly = true)
@@ -35,7 +34,6 @@ public class ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Покупка с id = " + id + " не найдена"));
         if (!canModify(product)) {
-            log.warn("{}: отказано в изменении покупки id = {}", currentUser.username().orElse("?"), id);
             throw new AccessDeniedException("Нет прав на изменение покупки " + id);
         }
         return product;
@@ -59,9 +57,9 @@ public class ProductService {
         // Магазин проверяется: USER может выбрать только свой магазин
         product.setShop(shopService.getForUse(form.getShopId()));
         Product saved = productRepository.save(product);
-        log.info("{} {} покупку id = {}: {} × {} по {} руб. в «{}»", user.getUsername(),
-                form.getId() == null ? "добавил" : "изменил", saved.getId(), saved.getName(),
-                saved.getQuantity(), saved.getPrice(), saved.getShop().getName());
+        actionLog.info(user.getUsername(), (form.getId() == null ? "добавил" : "изменил")
+                + " покупку id = " + saved.getId() + ": " + saved.getName() + " × " + saved.getQuantity()
+                + " по " + saved.getPrice() + " руб. в «" + saved.getShop().getName() + "»");
         return saved;
     }
 
@@ -69,7 +67,7 @@ public class ProductService {
     public void delete(Long id) {
         Product product = getForEdit(id);
         productRepository.delete(product);
-        log.info("{} удалил покупку id = {}: {}", currentUser.username().orElse("?"), id, product.getName());
+        actionLog.info(currentUser.username().orElse("?"), "удалил покупку id = " + id + ": " + product.getName());
     }
 
     public boolean canModify(Product product) {

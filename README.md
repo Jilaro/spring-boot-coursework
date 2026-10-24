@@ -8,10 +8,11 @@ Spring Boot 4.1.2, Java 25, Spring MVC, Spring Security, Spring Data JPA (Hibern
 ## Запуск
 
 Запустить `ShoppingListApplication`, открыть http://localhost:8080/.
-Таблицы `users`, `roles`, `users_roles`, `shops`, `products` Hibernate создаёт сам.
+Таблицы `users`, `roles`, `users_roles`, `shops`, `products`, `user_actions` Hibernate создаёт сам.
 При первом запуске создаётся администратор **admin / admin123** (задаётся в `application.properties`).
 
-Логи пишутся в консоль и в файл `logs/shopping.log`.
+Действия пользователей (вход, выход, добавление, изменение, удаление, расчёт, смена ролей, отказы в доступе)
+записываются в таблицу `user_actions` и в файл `logs/shopping.log`.
 
 ## Роли
 
@@ -19,7 +20,7 @@ Spring Boot 4.1.2, Java 25, Spring MVC, Spring Security, Spring Data JPA (Hibern
 |------|-------|
 | READ_ONLY | просмотр всех записей и расчёт; выдаётся при регистрации |
 | USER | добавление, изменение и удаление своих записей; видит только свои записи |
-| ADMIN | полный доступ ко всем записям, назначение ролей, Actuator |
+| ADMIN | полный доступ ко всем записям, назначение ролей, журнал действий, Actuator |
 
 ## Страницы
 
@@ -31,6 +32,7 @@ Spring Boot 4.1.2, Java 25, Spring MVC, Spring Security, Spring Data JPA (Hibern
 | `/shops`, `/shops/new` | список и форма магазинов |
 | `/calculate` | расчёт расходов за период |
 | `/admin/users` | назначение ролей (ADMIN) |
+| `/admin/actions` | журнал действий пользователей (ADMIN) |
 | `/about` | о приложении |
 | `/actuator/health`, `/actuator/metrics`, `/actuator/logfile` … | мониторинг (ADMIN) |
 

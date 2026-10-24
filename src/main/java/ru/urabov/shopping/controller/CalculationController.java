@@ -1,7 +1,6 @@
 package ru.urabov.shopping.controller;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -10,13 +9,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import ru.urabov.shopping.dto.CalculationRequest;
 import ru.urabov.shopping.dto.CalculationResult;
 import ru.urabov.shopping.security.CurrentUser;
+import ru.urabov.shopping.service.ActionLogService;
 import ru.urabov.shopping.service.ExpenseCalculationService;
 import ru.urabov.shopping.service.ProductService;
 import ru.urabov.shopping.service.ShopService;
 
 import java.time.LocalDate;
 
-@Slf4j
 @Controller
 @RequiredArgsConstructor
 public class CalculationController {
@@ -25,6 +24,7 @@ public class CalculationController {
     private final ProductService productService;
     private final ShopService shopService;
     private final CurrentUser currentUser;
+    private final ActionLogService actionLog;
 
     // Форма отправляется GET-запросом: параметры расчёта видны в адресе, страницу можно обновить
     @GetMapping("/calculate")
@@ -55,8 +55,8 @@ public class CalculationController {
             return "calculate";
         }
         CalculationResult calc = calculationService.calculate(productService.findVisible(), form);
-        log.info("{} выполнил расчёт за {} – {}: {} покупок на {} руб.", currentUser.username().orElse("?"),
-                form.getDateFrom(), form.getDateTo(), calc.purchaseCount(), calc.totalCost());
+        actionLog.info(currentUser.username().orElse("?"), "выполнил расчёт за " + form.getDateFrom()
+                + " – " + form.getDateTo() + ": " + calc.purchaseCount() + " покупок на " + calc.totalCost() + " руб.");
         model.addAttribute("result", calc);
         return "calculate";
     }
